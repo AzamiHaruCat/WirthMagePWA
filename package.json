@@ -1,0 +1,31 @@
+{
+  "name": "wirthmage-ts",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "lint": "eslint src/**/*.ts",
+    "format": "prettier --write \"src/**/*.{ts,css,html}\""
+  },
+  "dependencies": {
+    "image-q": "^4.0.0",
+    "lit": "^3.3.1",
+    "pica": "^9.0.1",
+    "upng-js": "^2.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.1.0",
+    "@types/pica": "^9.0.5",
+    "@types/upng-js": "^2.1.5",
+    "@types/wicg-file-system-access": "^2023.10.7",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.8.1",
+    "typescript": "~5.9.3",
+    "vite": "^7.2.4",
+    "vite-plugin-pwa": "^1.2.0"
+  }
+}

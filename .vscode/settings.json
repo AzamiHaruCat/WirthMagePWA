@@ -1,0 +1,18 @@
+{
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.sortImports": "explicit"
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.indentSize": "tabSize",
+  "editor.insertSpaces": true,
+  "editor.tabSize": 2,
+  "lit-plugin.rules.no-missing-import": "error",
+  "lit-plugin.rules.no-unknown-tag-name": "error",
+  "terminal.integrated.cwd": "${workspaceFolder}",
+  "typescript.preferences.importModuleSpecifier": "non-relative"
+}
