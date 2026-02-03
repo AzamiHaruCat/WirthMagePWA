@@ -14,6 +14,12 @@ export default defineConfig({
         background_color: '#ffffff',
         icons: [
           {
+            src: 'favicon.png',
+            sizes: '48x48',
+            type: 'image/png',
+            purpose: 'any',
+          },
+          {
             src: 'icon-512.png',
             sizes: '512x512',
             type: 'image/png',
