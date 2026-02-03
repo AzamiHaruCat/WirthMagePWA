@@ -78,14 +78,17 @@ export class WirthMageApp extends LitElement {
   processedCount: number = 0;
 
   @state()
-  private _isAppMode = window.matchMedia(
-    ['standalone', 'minimal-ui', 'window-controls-overlay']
-      .map((v) => `(display-mode: ${v})`)
-      .join(', '),
-  ).matches;
+  private _isAppMode = false;
 
   override connectedCallback(): void {
     super.connectedCallback();
+
+    this._isAppMode = window.matchMedia(
+      ['standalone', 'minimal-ui', 'window-controls-overlay']
+        .map((v) => `(display-mode: ${v})`)
+        .join(', '),
+    ).matches;
+
     document.addEventListener('dragover', this.#handleDragOver);
     document.addEventListener('dragleave', this.#handleDragLeave);
     document.addEventListener('drop', this.#handleDrop);
