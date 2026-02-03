@@ -9,6 +9,12 @@ import type { ImageInput } from './image-input';
 
 const TAG_NAME = 'wirthmage-app';
 
+const APP_MODE_QUERY = window.matchMedia(`
+  (display-mode: standalone),
+  (display-mode: minimal-ui),
+  (display-content: window-controls-overlay)
+`);
+
 @customElement(TAG_NAME)
 export class WirthMageApp extends LitElement {
   static override styles?: CSSResultGroup = css`
@@ -77,17 +83,8 @@ export class WirthMageApp extends LitElement {
   @state()
   processedCount: number = 0;
 
-  @state()
-  private _isAppMode = false;
-
   override connectedCallback(): void {
     super.connectedCallback();
-
-    this._isAppMode = window.matchMedia(
-      ['standalone', 'minimal-ui', 'window-controls-overlay']
-        .map((v) => `(display-mode: ${v})`)
-        .join(', '),
-    ).matches;
 
     document.addEventListener('dragover', this.#handleDragOver);
     document.addEventListener('dragleave', this.#handleDragLeave);
@@ -175,7 +172,7 @@ export class WirthMageApp extends LitElement {
         >
           変換
         </button>
-        ${this._isAppMode
+        ${APP_MODE_QUERY.matches
           ? html`<button
               id="quit"
               @click=${() => window.close()}
