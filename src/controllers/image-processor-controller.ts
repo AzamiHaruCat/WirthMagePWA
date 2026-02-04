@@ -45,12 +45,19 @@ export class ImageProcessorController implements ReactiveController {
 
     const { setting } = this.host;
     const { outputType, scaleX2, scaleX4 } = setting;
-    const options = {
+    const options: Parameters<ImageProcessor['process']>[1] = {
       imageSize: setting.outputSize,
       colors: setting.colors,
       mask: setting.mask,
       outline: setting.outlineStyle,
     };
+    if (outputType === 'JPEG') {
+      delete options.mask;
+      delete options.colors;
+      delete options.outline;
+    } else if (!options.mask) {
+      delete options.outline;
+    }
 
     const ext = { BMP: '.bmp', PNG: '.png', JPEG: '.jpg' }[outputType];
 
