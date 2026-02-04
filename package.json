@@ -11,6 +11,7 @@
     "format": "prettier --write \"src/**/*.{ts,css,html}\""
   },
   "dependencies": {
+    "@jsquash/jpeg": "^1.6.0",
     "@jsquash/oxipng": "^2.3.0",
     "image-q": "^4.0.0",
     "lit": "^3.3.1",

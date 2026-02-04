@@ -3,6 +3,9 @@ import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+  optimizeDeps: {
+    exclude: ['@jsquash/jpeg', '@jsquash/oxipng'],
+  },
   plugins: [
     VitePWA({
       registerType: 'autoUpdate',
