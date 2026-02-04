@@ -116,7 +116,7 @@ export class WirthMageApp extends LitElement {
     if (!FILE_SYSTEM_ENABLED) {
       return html`
         <div id="error">
-          Microsoft Edge や Google Chrome 等 Chromium 系ブラウザでご利用ください。
+          PC 版の Microsoft Edge や Google Chrome 等 Chromium 系ブラウザでご利用ください。
         </div>
       `;
     }
