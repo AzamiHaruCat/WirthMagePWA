@@ -44,6 +44,7 @@ export class WirthMageApp extends LitElement {
     }
     #images {
       grid-row: 1 / -1;
+      contain: size;
     }
     #notice {
       margin: auto;
