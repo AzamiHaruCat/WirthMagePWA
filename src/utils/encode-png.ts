@@ -1,11 +1,15 @@
+import { optimise } from '@jsquash/oxipng';
+import { init } from '@jsquash/oxipng/optimise';
 import * as iq from 'image-q';
 import UPNG from 'upng-js';
 
-export function encodePNG(
+export const initializeOxiPNG = init('/wasm/squoosh_oxipng_bg.wasm');
+
+export const encodePNG = async (
   container: iq.utils.PointContainer,
   palette: iq.utils.Palette,
   mask?: boolean,
-): Blob {
+): Promise<Blob> => {
   const width = container.getWidth();
   const height = container.getHeight();
   const points = container.getPointArray();
@@ -25,5 +29,14 @@ export function encodePNG(
 
   const buffer = UPNG.encode([rgba.buffer], width, height, points.length);
 
-  return new Blob([buffer], { type: 'image/png' });
-}
+  try {
+    await initializeOxiPNG;
+  } catch (e) {
+    console.error(e);
+    return new Blob([buffer], { type: 'image/png' });
+  }
+
+  const optimisedBuffer = await optimise(buffer, { level: 2 });
+
+  return new Blob([optimisedBuffer], { type: 'image/png' });
+};

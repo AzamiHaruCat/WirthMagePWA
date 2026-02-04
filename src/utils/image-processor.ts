@@ -213,7 +213,7 @@ export class ImageProcessor {
   /**
    * 保持しているデータから PNG 形式の Blob を生成
    */
-  public encodePNG(mask: boolean = false): Blob {
+  public encodePNG(mask: boolean = false): Promise<Blob> {
     if (!this.lastIndexedContainer || !this.lastPalette) {
       throw new Error('データが不足しています。');
     }

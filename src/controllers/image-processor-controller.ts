@@ -1,8 +1,10 @@
 import type { ConverterSetting } from '@/components/converter-setting';
 import type { ImageInput } from '@/components/image-input';
+import { initializeOxiPNG } from '@/utils/encode-png';
 import { getDirectoryHandle } from '@/utils/file-system';
 import { fileToCanvas } from '@/utils/image-file';
 import { ImageProcessor, type ConvertOptions } from '@/utils/image-processor';
+import { optimise } from '@jsquash/oxipng';
 import type { ReactiveController, ReactiveControllerHost } from 'lit';
 
 interface ImageProcessorControllerHost extends ReactiveControllerHost, HTMLElement {
@@ -136,12 +138,27 @@ export class ImageProcessorController implements ReactiveController {
   ): Promise<void> {
     const canvas = await this.#processor.process(sourceCanvas, options);
     const blob = options.colors
-      ? this.#processor.encodePNG(options.mask)
+      ? await this.#processor.encodePNG(options.mask)
       : await new Promise<Blob | null>((resolve) => {
-          canvas.toBlob((b) => resolve(b), 'image/png');
+          canvas.toBlob((b) => {
+            if (!b) resolve(b);
+            else this.#optimizePNG(b).then(resolve);
+          }, 'image/png');
         });
+
     if (blob) this.#writeFile(targetDir, fileName, blob);
     canvas.width = canvas.height = 0;
+  }
+
+  async #optimizePNG(b: Blob): Promise<Blob> {
+    try {
+      await initializeOxiPNG;
+      const buffer = await b.arrayBuffer();
+      const optimisedBuffer = await optimise(buffer, { level: 2 });
+      return new Blob([optimisedBuffer], { type: 'image/png' });
+    } catch {
+      return b;
+    }
   }
 
   async #outputJPEG(

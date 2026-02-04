@@ -1,9 +1,9 @@
 import * as iq from 'image-q';
 
-export function encodeBMP(
+export const encodeBMP = (
   container: iq.utils.PointContainer,
   palette: iq.utils.Palette | null,
-): Blob {
+): Blob => {
   const width = container.getWidth();
   const height = container.getHeight();
   const pointArray = container.getPointArray();
@@ -104,4 +104,4 @@ export function encodeBMP(
   }
 
   return new Blob([buffer], { type: 'image/bmp' });
-}
+};
