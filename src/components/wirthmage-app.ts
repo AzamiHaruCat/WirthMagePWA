@@ -17,8 +17,9 @@ const APP_MODE_QUERY = window.matchMedia(`
 `);
 
 const FILE_SYSTEM_ENABLED =
-  'FileSystemDirectoryHandle' in window &&
-  typeof window.showDirectoryPicker === 'function';
+  typeof window.FileSystemHandle?.prototype?.queryPermission === 'function' &&
+  typeof window.showDirectoryPicker === 'function' &&
+  typeof navigator.storage?.getDirectory === 'function';
 
 @customElement(TAG_NAME)
 export class WirthMageApp extends LitElement {
