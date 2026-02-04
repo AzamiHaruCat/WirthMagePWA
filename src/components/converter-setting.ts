@@ -267,7 +267,7 @@ export class ConverterSetting extends LitElement implements Serializable<Setting
               const input = e.target as FormInput<string>;
               this.outline = (input.value as OutlineStyleName) ?? '';
             }}
-            ?disabled=${!this.mask}
+            ?disabled=${!this.mask || this.outputType === 'JPEG'}
           >
             <span value="">なし</span>
             ${repeat(
