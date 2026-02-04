@@ -15,6 +15,10 @@ const APP_MODE_QUERY = window.matchMedia(`
   (display-content: window-controls-overlay)
 `);
 
+const FILE_SYSTEM_ENABLED =
+  'FileSystemDirectoryHandle' in window &&
+  typeof window.showDirectoryPicker === 'function';
+
 @customElement(TAG_NAME)
 export class WirthMageApp extends LitElement {
   static override styles?: CSSResultGroup = css`
@@ -99,7 +103,7 @@ export class WirthMageApp extends LitElement {
   }
 
   protected override render(): unknown {
-    if (!('FileSystemDirectoryHandle' in window)) {
+    if (!FILE_SYSTEM_ENABLED) {
       return html`
         <div id="error">
           Microsoft Edge や Google Chrome 等 Chromium 系ブラウザでご利用ください。
