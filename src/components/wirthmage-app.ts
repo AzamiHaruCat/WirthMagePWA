@@ -118,7 +118,10 @@ export class WirthMageApp extends LitElement {
           @update=${() => this.requestUpdate()}
           ?disabled="${this.isProcessing}"
         ></image-input>
-        <converter-setting id="setting"></converter-setting>
+        <converter-setting
+          id="setting"
+          ?disabled="${this.isProcessing}"
+        ></converter-setting>
         ${this.#renderProcessing() ?? [this.#renderNotice(), this.#renderButtons()]}
       </div>
     `;
