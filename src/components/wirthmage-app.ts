@@ -6,6 +6,7 @@ import './converter-setting';
 import type { ConverterSetting } from './converter-setting';
 import './image-input';
 import type { ImageInput } from './image-input';
+import './wirthmage-footer';
 
 const TAG_NAME = 'wirthmage-app';
 
@@ -22,14 +23,20 @@ const FILE_SYSTEM_ENABLED =
 @customElement(TAG_NAME)
 export class WirthMageApp extends LitElement {
   static override styles?: CSSResultGroup = css`
+    :host {
+      display: flex;
+      flex-flow: column;
+      width: 100dvw;
+      height: 100dvh;
+      padding: 3vh 3vw 2vh;
+      gap: 0.2em;
+      box-sizing: border-box;
+    }
     #container {
+      flex: 1;
       display: grid;
       grid-template: 1fr auto auto / minmax(300px, 1fr) auto;
       gap: 3vh 3vw;
-      padding: 3vh 3vw;
-      width: 100dvw;
-      height: 100dvh;
-      box-sizing: border-box;
     }
     #error {
       color: #888;
@@ -124,6 +131,7 @@ export class WirthMageApp extends LitElement {
         ></converter-setting>
         ${this.#renderProcessing() ?? [this.#renderNotice(), this.#renderButtons()]}
       </div>
+      <wirthmage-footer id="#footer"></wirthmage-footer>
     `;
   }
 
