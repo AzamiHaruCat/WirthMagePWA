@@ -24,19 +24,20 @@ const FILE_SYSTEM_ENABLED =
 export class WirthMageApp extends LitElement {
   static override styles?: CSSResultGroup = css`
     :host {
-      display: flex;
-      flex-flow: column;
+      display: grid;
+      grid-template: 1fr auto / 1fr;
+      gap: 0.25rem;
       width: 100dvw;
       height: 100dvh;
-      padding: 3vh 3vw 2vh;
-      gap: 0.2em;
+      padding: 1rlh 3dvw 0.25rem;
       box-sizing: border-box;
+      overflow: auto;
     }
     #container {
-      flex: 1;
       display: grid;
       grid-template: 1fr auto auto / minmax(300px, 1fr) auto;
       gap: 3vh 3vw;
+      contain: layout;
     }
     #error {
       color: #888;
@@ -131,7 +132,7 @@ export class WirthMageApp extends LitElement {
         ></converter-setting>
         ${this.#renderProcessing() ?? [this.#renderNotice(), this.#renderButtons()]}
       </div>
-      <wirthmage-footer id="#footer"></wirthmage-footer>
+      <wirthmage-footer id="footer"></wirthmage-footer>
     `;
   }
 

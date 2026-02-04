@@ -78,6 +78,12 @@ export class ConverterSetting extends LitElement implements Serializable<Setting
         grid-column: 1 / -1;
       }
     }
+    [name='colors'] {
+      width: 9em;
+    }
+    [name='outline'] {
+      width: 8em;
+    }
   `;
 
   private _storage = new StorageController(this);
