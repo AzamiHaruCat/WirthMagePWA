@@ -44,9 +44,10 @@ export class ImageProcessorController implements ReactiveController {
     this.canceled = false;
 
     const { setting } = this.host;
-    const { outputType, scaleX2, scaleX4 } = setting;
+    const { outputSize, outputType } = setting;
+
     const options: Parameters<ImageProcessor['process']>[1] = {
-      imageSize: setting.outputSize,
+      imageSize: outputSize,
       colors: setting.colors,
       mask: setting.mask,
       outline: setting.outlineStyle,
@@ -58,6 +59,9 @@ export class ImageProcessorController implements ReactiveController {
     } else if (!options.mask) {
       delete options.outline;
     }
+
+    const scaleX2 = setting.scaleX2 && outputSize !== 'ASIS';
+    const scaleX4 = setting.scaleX4 && outputSize !== 'ASIS';
 
     const ext = { BMP: '.bmp', PNG: '.png', JPEG: '.jpg' }[outputType];
 
