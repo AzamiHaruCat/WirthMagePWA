@@ -14,16 +14,16 @@ export default defineConfig({
         background_color: '#ffffff',
         icons: [
           {
-            src: 'favicon.png',
-            sizes: '48x48',
-            type: 'image/png',
-            purpose: 'any',
-          },
-          {
             src: 'icon-512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any',
+          },
+          {
+            src: 'icon-180.png',
+            sizes: '180x180',
+            type: 'image/png',
+            purpose: 'maskable',
           },
         ],
       },
