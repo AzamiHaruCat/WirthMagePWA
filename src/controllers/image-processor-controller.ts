@@ -2,8 +2,9 @@ import type { ConverterSetting } from '@/components/converter-setting';
 import type { ImageInput } from '@/components/image-input';
 import { getDirectoryHandle } from '@/utils/file-system';
 import { fileToCanvas } from '@/utils/image-file';
-import { ImageProcessor, type ConvertOptions } from '@/utils/image-processor';
-import { encodeJPEG, optimisePNG } from '@/utils/squoosh-util';
+import type { ImageProcessor } from '@/utils/image-processor';
+import { type WorkerInput, type WorkerOutput } from '@/workers/processor.worker';
+import ProcessorWorker from '@/workers/processor.worker?worker';
 import type { ReactiveController, ReactiveControllerHost } from 'lit';
 
 interface ImageProcessorControllerHost extends ReactiveControllerHost, HTMLElement {
@@ -16,7 +17,6 @@ interface ImageProcessorControllerHost extends ReactiveControllerHost, HTMLEleme
 export class ImageProcessorController implements ReactiveController {
   readonly host: ImageProcessorControllerHost;
 
-  #processor = new ImageProcessor();
   canceled = false;
 
   constructor(host: ImageProcessorControllerHost) {
@@ -46,6 +46,8 @@ export class ImageProcessorController implements ReactiveController {
 
     const { setting } = this.host;
     const { outputSize, outputType } = setting;
+
+    const worker = new ProcessorWorker();
 
     const options: Parameters<ImageProcessor['process']>[1] = {
       imageSize: outputSize,
@@ -86,25 +88,23 @@ export class ImageProcessorController implements ReactiveController {
         if (!enabled) continue;
 
         const currentName = baseName + suffix + ext;
-        const currentOptions = { ...options, scale: factor };
 
-        try {
-          switch (outputType) {
-            case 'BMP':
-              await this.#outputBMP(canvas, targetDir, currentName, currentOptions);
-              break;
-            case 'PNG':
-              await this.#outputPNG(canvas, targetDir, currentName, currentOptions);
-              break;
-            case 'JPEG':
-              await this.#outputJPEG(canvas, targetDir, currentName, currentOptions);
-              break;
-          }
-        } catch (e) {
-          console.error('処理中にエラーが発生しました:', e);
-          this.host.isProcessing = false;
-          return;
-        }
+        const blob = await new Promise<Blob>((resolve, reject) => {
+          worker.onmessage = (e: MessageEvent<WorkerOutput>) => {
+            if (e.data.error) reject(new Error(e.data.error));
+            else if (e.data.blob) resolve(e.data.blob);
+          };
+
+          const input: WorkerInput = {
+            file: item.file,
+            options: { ...options, scale: factor },
+            outputType,
+          };
+
+          worker.postMessage(input);
+        });
+
+        await this.#writeFile(targetDir, currentName, blob);
       }
 
       this.host.processedCount++;
@@ -115,80 +115,6 @@ export class ImageProcessorController implements ReactiveController {
     }
 
     this.host.isProcessing = false;
-  }
-
-  async #outputBMP(
-    sourceCanvas: HTMLCanvasElement,
-    targetDir: FileSystemDirectoryHandle,
-    fileName: string,
-    options: ConvertOptions,
-  ): Promise<void> {
-    const canvas = await this.#processor.process(sourceCanvas, options);
-    const blob = this.#processor.encodeBMP();
-    canvas.width = canvas.height = 0;
-    if (blob) await this.#writeFile(targetDir, fileName, blob);
-  }
-
-  async #outputPNG(
-    sourceCanvas: HTMLCanvasElement,
-    targetDir: FileSystemDirectoryHandle,
-    fileName: string,
-    options: ConvertOptions,
-  ): Promise<void> {
-    const canvas = await this.#processor.process(sourceCanvas, options);
-    let blob: Blob | null = null;
-
-    if (options.colors) {
-      blob = await this.#processor.encodePNG(options.mask);
-    } else {
-      try {
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          const buffer = await optimisePNG(imageData, { level: 2 });
-          blob = new Blob([buffer], { type: 'image/png' });
-        }
-      } catch (e) {
-        console.error(e);
-        blob = await new Promise((resolve) => {
-          canvas.toBlob(resolve, 'image/png');
-        });
-      }
-    }
-
-    canvas.width = canvas.height = 0;
-    if (blob) await this.#writeFile(targetDir, fileName, blob);
-  }
-
-  async #outputJPEG(
-    sourceCanvas: HTMLCanvasElement,
-    targetDir: FileSystemDirectoryHandle,
-    fileName: string,
-    options: ConvertOptions,
-  ): Promise<void> {
-    const canvas = await this.#processor.process(sourceCanvas, options);
-    let blob: Blob | null = null;
-
-    try {
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const buffer = await encodeJPEG(imageData, {
-          quality: 85,
-          progressive: true,
-          optimize_coding: true,
-        });
-        blob = new Blob([buffer], { type: 'image/jpeg' });
-      }
-    } catch (e) {
-      console.error(e);
-      blob = await new Promise((resolve) => {
-        canvas.toBlob(resolve, 'image/jpeg', 0.85);
-      });
-    }
-
-    canvas.width = canvas.height = 0;
-    if (blob) await this.#writeFile(targetDir, fileName, blob);
   }
 
   async #writeFile(targetDir: FileSystemDirectoryHandle, fileName: string, blob: Blob) {

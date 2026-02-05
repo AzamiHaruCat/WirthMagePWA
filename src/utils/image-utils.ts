@@ -1,6 +1,8 @@
+export type RGB = [number, number, number] | readonly [number, number, number];
+
 export interface OutlineStyle {
-  inner?: string;
-  outer?: string;
+  inner?: RGB;
+  outer?: RGB;
 }
 
 /**
@@ -36,10 +38,13 @@ export const calculateCenterCrop = (
  * ImageDataに対して指定した関数を適用し、結果をCanvasに書き戻す
  */
 export const updateCanvasImageData = (
-  canvas: HTMLCanvasElement,
+  canvas: HTMLCanvasElement | OffscreenCanvas,
   processor: (data: ImageData) => void | ImageData,
 ) => {
-  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  const ctx = canvas.getContext('2d', { willReadFrequently: true }) as
+    | CanvasRenderingContext2D
+    | OffscreenCanvasRenderingContext2D
+    | null;
   if (!ctx) return;
 
   const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -48,9 +53,9 @@ export const updateCanvasImageData = (
 };
 
 /**
- * 色をrgb配列に
+ * 色をrgb配列にする（Worker非対応）
  */
-export const parseColor = (color: string): [number, number, number] => {
+export const parseColor = (color: string): RGB => {
   const temp = document.createElement('div');
   temp.style.color = color;
   document.body.append(temp);
@@ -72,7 +77,7 @@ export const applyBinaryAlpha = (imageData: ImageData): void => {
 };
 
 /**
- * 縁取り処理（ピクセル直接操作版）
+ * 縁取り処理
  */
 export const drawOutline = (imageData: ImageData, style: OutlineStyle): ImageData => {
   const { width, height, data } = imageData;
@@ -84,8 +89,8 @@ export const drawOutline = (imageData: ImageData, style: OutlineStyle): ImageDat
   const output = new ImageData(new Uint8ClampedArray(data), width, height);
   const outData = output.data;
 
-  const innerRGB = style.inner ? parseColor(style.inner) : null;
-  const outerRGB = style.outer ? parseColor(style.outer) : null;
+  const innerRGB = style.inner ?? null;
+  const outerRGB = style.outer ?? null;
 
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
@@ -129,4 +134,44 @@ export const drawOutline = (imageData: ImageData, style: OutlineStyle): ImageDat
   }
 
   return output;
+};
+
+/**
+ * アンシャープマスク
+ */
+export const applyUnsharpMask = (
+  imageData: ImageData,
+  amount: number,
+  threshold: number,
+): ImageData => {
+  const { data, width, height } = imageData;
+  const output = new Uint8ClampedArray(data.length);
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const i = (y * width + x) * 4;
+
+      for (let c = 0; c < 3; c++) {
+        const idx = i + c;
+        const center = data[idx];
+
+        const top = y > 0 ? data[idx - width * 4] : center;
+        const bottom = y < height - 1 ? data[idx + width * 4] : center;
+        const left = x > 0 ? data[idx - 4] : center;
+        const right = x < width - 1 ? data[idx + 4] : center;
+
+        const edge = center * 4 - top - bottom - left - right;
+
+        if (Math.abs(edge) > threshold) {
+          const sharpened = center + edge * amount;
+          output[idx] = sharpened;
+        } else {
+          output[idx] = center;
+        }
+      }
+      output[i + 3] = data[i + 3];
+    }
+  }
+
+  return new ImageData(output, width, height);
 };

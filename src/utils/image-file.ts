@@ -40,10 +40,8 @@ export const revokeImageFile = (image: ImageFile): void => {
   URL.revokeObjectURL(image.previewUrl);
 };
 
-export const fileToCanvas = async (item: ImageFile): Promise<HTMLCanvasElement> => {
-  const canvas = document.createElement('canvas');
-  canvas.width = item.width;
-  canvas.height = item.height;
+export const fileToCanvas = async (item: ImageFile): Promise<OffscreenCanvas> => {
+  const canvas = new OffscreenCanvas(item.width, item.height);
 
   const bitmap = await createImageBitmap(item.file);
   canvas.getContext('2d')!.drawImage(bitmap, 0, 0);

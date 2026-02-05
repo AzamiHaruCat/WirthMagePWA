@@ -22,15 +22,17 @@ const TAG_NAME = 'converter-setting';
 const OUTPUT_TYPES = ['BMP', 'PNG', 'JPEG'] as const;
 export type OutputType = (typeof OUTPUT_TYPES)[number];
 
-const OUTLINE_STYLES = {
-  黒: { inner: 'black' },
-  白: { inner: 'white' },
-  '黒(外側)': { outer: 'black' },
-  '白(外側)': { outer: 'white' },
-  '黒+白(外側)': { inner: 'black', outer: 'white' },
-  '白+黒(外側)': { inner: 'white', outer: 'black' },
+const BLACK = [0, 0, 0] as const;
+const WHITE = [255, 255, 255] as const;
+
+const OUTLINE_STYLES: Record<string, OutlineStyle> = {
+  黒: { inner: BLACK },
+  白: { inner: WHITE },
+  '黒(外側)': { outer: BLACK },
+  '白(外側)': { outer: WHITE },
+  '黒+白(外側)': { inner: BLACK, outer: WHITE },
+  '白+黒(外側)': { inner: WHITE, outer: BLACK },
 } as const;
-export type OutlineStyleName = keyof typeof OUTLINE_STYLES;
 
 interface SettingData extends JsonObject {
   outputSize: DimensionPresetType | 'ASIS';
@@ -39,7 +41,7 @@ interface SettingData extends JsonObject {
   outputType: OutputType;
   colors: number;
   mask: boolean;
-  outline: OutlineStyleName | '';
+  outline: string;
 }
 
 @customElement(TAG_NAME)
@@ -107,10 +109,10 @@ export class ConverterSetting extends LitElement implements Serializable<Setting
   mask = false;
 
   @property()
-  outline: OutlineStyleName | '' = '';
+  outline: string = '';
 
   get outlineStyle(): OutlineStyle {
-    return { ...(OUTLINE_STYLES[this.outline as OutlineStyleName] ?? null) };
+    return { ...(OUTLINE_STYLES[this.outline] ?? null) };
   }
 
   serialize(): SettingData {
@@ -271,7 +273,7 @@ export class ConverterSetting extends LitElement implements Serializable<Setting
             .value=${this.outline as any}
             @input=${(e: Event) => {
               const input = e.target as FormInput<string>;
-              this.outline = (input.value as OutlineStyleName) ?? '';
+              this.outline = input.value ?? '';
             }}
             ?disabled=${!this.mask || this.outputType === 'JPEG'}
           >

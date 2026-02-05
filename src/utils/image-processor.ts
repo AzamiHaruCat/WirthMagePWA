@@ -1,17 +1,16 @@
 import { encodePNG } from '@/utils/encode-png';
+import { resize } from '@/utils/squoosh-util';
 import * as iq from 'image-q';
-import Pica from 'pica';
 import { Dimension, DimensionPreset, type DimensionPresetType } from './dimension';
 import { encodeBMP } from './encode-bmp';
 import {
   applyBinaryAlpha,
+  applyUnsharpMask,
   calculateCenterCrop,
   drawOutline,
   updateCanvasImageData,
   type OutlineStyle,
 } from './image-utils';
-
-const pica = new Pica();
 
 export interface ConvertOptions {
   imageSize?: DimensionPresetType | 'ASIS';
@@ -26,15 +25,13 @@ export class ImageProcessor {
   private lastPalette: iq.utils.Palette | null = null;
 
   async process(
-    sourceCanvas: HTMLCanvasElement,
+    sourceCanvas: OffscreenCanvas | ImageBitmap,
     options: ConvertOptions = {},
-  ): Promise<HTMLCanvasElement> {
+  ): Promise<OffscreenCanvas> {
     this.lastIndexedContainer = null;
     this.lastPalette = null;
 
-    const canvas = document.createElement('canvas');
-    canvas.width = sourceCanvas.width;
-    canvas.height = sourceCanvas.height;
+    const canvas = new OffscreenCanvas(sourceCanvas.width, sourceCanvas.height);
     const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
     ctx.drawImage(sourceCanvas, 0, 0);
 
@@ -70,7 +67,7 @@ export class ImageProcessor {
     return canvas;
   }
 
-  private mask(canvas: HTMLCanvasElement): string {
+  private mask(canvas: OffscreenCanvas): string {
     let r!: number, g!: number, b!: number;
 
     updateCanvasImageData(canvas, ({ data }) => {
@@ -87,7 +84,11 @@ export class ImageProcessor {
     return `rgb(${r},${g},${b})`;
   }
 
-  private async resize(canvas: HTMLCanvasElement, dimension: Dimension): Promise<void> {
+  private async resize(canvas: OffscreenCanvas, dimension: Dimension): Promise<void> {
+    if (canvas.width === dimension.width && canvas.height === dimension.height) {
+      return;
+    }
+
     const rect = calculateCenterCrop(
       canvas.width,
       canvas.height,
@@ -95,34 +96,25 @@ export class ImageProcessor {
       dimension.height,
     );
 
-    const croppedCanvas = document.createElement('canvas');
-    croppedCanvas.width = rect.width;
-    croppedCanvas.height = rect.height;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
+    const inputImageData = ctx.getImageData(rect.x, rect.y, rect.width, rect.height);
 
-    const croppedCtx = croppedCanvas.getContext('2d')!;
-    croppedCtx.drawImage(
-      canvas,
-      rect.x,
-      rect.y,
-      rect.width,
-      rect.height,
-      0,
-      0,
-      rect.width,
-      rect.height,
-    );
+    let outputImageData = await resize(inputImageData, {
+      width: dimension.width,
+      height: dimension.height,
+      method: 'mitchell',
+    });
+
+    if (dimension.pixels < 0x8000) {
+      outputImageData = applyUnsharpMask(outputImageData, 0.75, 0.75);
+    }
 
     canvas.width = dimension.width;
     canvas.height = dimension.height;
-
-    await pica.resize(croppedCanvas, canvas, {
-      unsharpAmount: 50,
-      unsharpRadius: 0.6,
-      unsharpThreshold: 2,
-    });
+    ctx.putImageData(outputImageData, 0, 0);
   }
 
-  private async quantize(canvas: HTMLCanvasElement, colors: number): Promise<void> {
+  private async quantize(canvas: OffscreenCanvas, colors: number): Promise<void> {
     updateCanvasImageData(canvas, (data) => {
       const inPointContainer = iq.utils.PointContainer.fromImageData(data);
 
@@ -151,7 +143,7 @@ export class ImageProcessor {
   /**
    * 最終的なピクセルデータからBMP用のパレットとインデックスを生成
    */
-  private refreshFinalData(canvas: HTMLCanvasElement, colors: number): void {
+  private refreshFinalData(canvas: OffscreenCanvas, colors: number): void {
     const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
     const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const container = iq.utils.PointContainer.fromImageData(data);
@@ -192,7 +184,7 @@ export class ImageProcessor {
   /**
    * 透過部分を背景色で塗りつぶす
    */
-  private flattenBackground(canvas: HTMLCanvasElement, bgColor: string): void {
+  private flattenBackground(canvas: OffscreenCanvas, bgColor: string): void {
     const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
     ctx.globalCompositeOperation = 'destination-over';
     ctx.fillStyle = bgColor;

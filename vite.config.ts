@@ -4,11 +4,18 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
   optimizeDeps: {
-    exclude: ['@jsquash/jpeg', '@jsquash/oxipng'],
+    exclude: ['@jsquash/jpeg', '@jsquash/oxipng', '@jsquash/resize'],
+  },
+  worker: {
+    format: 'es',
   },
   plugins: [
     VitePWA({
       registerType: 'autoUpdate',
+      injectRegister: 'auto',
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,wasm}'],
+      },
       manifest: {
         name: 'WirthMagePWA',
         short_name: 'WirthMagePWA',
