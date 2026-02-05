@@ -85,37 +85,44 @@ export class ImageProcessorController implements ReactiveController {
         { factor: 4, suffix: '.x4' },
       ];
 
-      await Promise.all(
-        scales.map(async ({ factor, suffix }) => {
-          const worker = workers[factor];
-          if (!worker) return;
+      try {
+        await Promise.all(
+          scales.map(async ({ factor, suffix }) => {
+            const worker = workers[factor];
+            if (!worker) return;
 
-          const currentName = baseName + suffix + ext;
+            const currentName = baseName + suffix + ext;
 
-          const blob = await new Promise<Blob>((resolve, reject) => {
-            worker.onmessage = (e: MessageEvent<WorkerOutput>) => {
-              if (e.data.error) reject(new Error(e.data.error));
-              else if (e.data.blob) resolve(e.data.blob);
-            };
+            const blob = await new Promise<Blob>((resolve, reject) => {
+              worker.onmessage = (e: MessageEvent<WorkerOutput>) => {
+                if (e.data.error) reject(new Error(e.data.error));
+                else if (e.data.blob) resolve(e.data.blob);
+              };
 
-            const input: WorkerInput = {
-              file: item.file,
-              options: { ...options, scale: factor },
-              outputType,
-            };
+              const input: WorkerInput = {
+                file: item.file,
+                options: { ...options, scale: factor },
+                outputType,
+              };
 
-            worker.postMessage(input);
-          });
+              worker.postMessage(input);
+            });
 
-          await this.#writeFile(targetDir, currentName, blob);
-        }),
-      );
+            if (blob) await this.#writeFile(targetDir, currentName, blob);
+          }),
+        );
+      } catch (e) {
+        console.error('処理が中断されました:', e);
+        break;
+      }
 
       this.host.processedCount++;
       processedNames.add(baseName);
 
       if (this.canceled) break;
     }
+
+    for (const worker of Object.values(workers)) worker && worker.terminate();
 
     this.host.isProcessing = false;
   }
