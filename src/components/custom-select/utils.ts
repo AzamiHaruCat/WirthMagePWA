@@ -6,7 +6,7 @@ export const SELECTED_SELECTOR = `${OPTION_SELECTOR}[aria-selected="true"]`;
 export const ACTIVE_SELECTOR = `${OPTION_SELECTOR}[data-active]`;
 
 export const getValue = (node?: Element | null) =>
-  (node?.getAttribute('value') ?? node?.textContent)?.trim() ?? '';
+  (node?.getAttribute("value") ?? node?.textContent)?.trim() ?? "";
 
 export const getIdOrRandomId = (node: Element) => {
   let id = node.id;

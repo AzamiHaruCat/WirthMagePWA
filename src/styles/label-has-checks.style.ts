@@ -1,4 +1,4 @@
-import { css } from 'lit';
+import { css } from "lit";
 
 export const LABEL_HAS_CHECKS_STYLE = css`
   input {

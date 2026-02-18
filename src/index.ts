@@ -1,1 +1,1 @@
-import '@/components/wirthmage-app';
+import "@/components/wirthmage-app";

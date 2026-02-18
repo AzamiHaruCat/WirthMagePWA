@@ -1,12 +1,13 @@
-import type { Serializable } from '@/interfaces/serializable';
-import type { ReactiveController, ReactiveControllerHost } from 'lit';
+import type { Serializable } from "@/interfaces/serializable";
+import type { ReactiveController, ReactiveControllerHost } from "lit";
 
 const getKey = (origin: HTMLElement) => {
   return origin.id ? `${origin.localName}#${origin.id}` : origin.localName;
 };
 
 export interface StorageContainer
-  extends ReactiveControllerHost, HTMLElement, Serializable<any> {}
+  extends ReactiveControllerHost, HTMLElement, Serializable<any>
+{}
 
 export class StorageController implements ReactiveController {
   #host: StorageContainer;
@@ -18,11 +19,17 @@ export class StorageController implements ReactiveController {
   }
 
   hostConnected() {
-    this.#host.addEventListener('request-save', this.#handleSave as EventListener);
+    this.#host.addEventListener(
+      "request-save",
+      this.#handleSave as EventListener,
+    );
   }
 
   hostDisconnected() {
-    this.#host.removeEventListener('request-save', this.#handleSave as EventListener);
+    this.#host.removeEventListener(
+      "request-save",
+      this.#handleSave as EventListener,
+    );
     Object.values(this.#timers).forEach(clearTimeout);
     this.#timers = {};
   }
@@ -59,7 +66,7 @@ export class StorageController implements ReactiveController {
         const serializedData = JSON.stringify(data);
         localStorage.setItem(key, serializedData);
       } catch (error) {
-        console.error('[StorageController] 保存に失敗しました:', error);
+        console.error("[StorageController] 保存に失敗しました:", error);
       }
     } else {
       localStorage.removeItem(key);
@@ -73,7 +80,7 @@ export class StorageController implements ReactiveController {
       const data = localStorage.getItem(key);
       if (data) this.#host.unserialize(JSON.parse(data));
     } catch (error) {
-      console.error('[StorageController] 復元に失敗しました:', error);
+      console.error("[StorageController] 復元に失敗しました:", error);
     }
   }
 }
@@ -84,7 +91,7 @@ type RequestSaveDetail = {
 
 export class RequestSaveEvent extends CustomEvent<RequestSaveDetail> {
   constructor(detail: RequestSaveDetail) {
-    super('request-save', { bubbles: true, composed: true, detail });
+    super("request-save", { bubbles: true, composed: true, detail });
   }
 }
 

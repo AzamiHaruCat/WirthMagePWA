@@ -1,4 +1,4 @@
-import type { ReactiveController, ReactiveControllerHost } from 'lit';
+import type { ReactiveController, ReactiveControllerHost } from "lit";
 
 type Callback = (e: KeyboardEvent) => any;
 
@@ -19,37 +19,37 @@ export class KeyboardController implements ReactiveController {
   }
 
   hostConnected(): void {
-    this.host.addEventListener('keydown', this.#handleKeyDown);
+    this.host.addEventListener("keydown", this.#handleKeyDown);
   }
 
   hostDisconnected(): void {
-    this.host.removeEventListener('keydown', this.#handleKeyDown);
+    this.host.removeEventListener("keydown", this.#handleKeyDown);
   }
 
   #handleKeyDown = (e: KeyboardEvent): void => {
     switch (e.key) {
-      case 'Enter':
+      case "Enter":
         this.onEnter?.(e);
         break;
-      case ' ':
+      case " ":
         this.onSpace?.(e);
         break;
-      case 'Escape':
+      case "Escape":
         this.onEscape?.(e);
         break;
-      case 'Tab':
+      case "Tab":
         this.onTab?.(e);
         break;
-      case 'ArrowUp':
+      case "ArrowUp":
         this.onArrowUp?.(e);
         break;
-      case 'ArrowDown':
+      case "ArrowDown":
         this.onArrowDown?.(e);
         break;
-      case 'ArrowLeft':
+      case "ArrowLeft":
         this.onArrowLeft?.(e);
         break;
-      case 'ArrowRight':
+      case "ArrowRight":
         this.onArrowRight?.(e);
         break;
     }

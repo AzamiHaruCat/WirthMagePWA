@@ -1,14 +1,20 @@
-import { ImageProcessorController } from '@/controllers/image-processor-controller';
-import { BUTTON_STYLE } from '@/styles/button.style';
-import { LitElement, css, html, type CSSResultGroup, type TemplateResult } from 'lit';
-import { customElement, query, state } from 'lit/decorators.js';
-import './converter-setting';
-import type { ConverterSetting } from './converter-setting';
-import './image-input';
-import type { ImageInput } from './image-input';
-import './wirthmage-footer';
+import { ImageProcessorController } from "@/controllers/image-processor-controller";
+import { BUTTON_STYLE } from "@/styles/button.style";
+import {
+  css,
+  type CSSResultGroup,
+  html,
+  LitElement,
+  type TemplateResult,
+} from "lit";
+import { customElement, query, state } from "lit/decorators.js";
+import "./converter-setting";
+import type { ConverterSetting } from "./converter-setting";
+import "./image-input";
+import type { ImageInput } from "./image-input";
+import "./wirthmage-footer";
 
-const TAG_NAME = 'wirthmage-app';
+const TAG_NAME = "wirthmage-app";
 
 const APP_MODE_QUERY = window.matchMedia(`
   (display-mode: standalone),
@@ -17,9 +23,9 @@ const APP_MODE_QUERY = window.matchMedia(`
 `);
 
 const FILE_SYSTEM_ENABLED =
-  typeof window.FileSystemHandle?.prototype?.queryPermission === 'function' &&
-  typeof window.showDirectoryPicker === 'function' &&
-  typeof navigator.storage?.getDirectory === 'function';
+  typeof window.FileSystemHandle?.prototype?.queryPermission === "function"
+  && typeof window.showDirectoryPicker === "function"
+  && typeof navigator.storage?.getDirectory === "function";
 
 @customElement(TAG_NAME)
 export class WirthMageApp extends LitElement {
@@ -82,13 +88,13 @@ export class WirthMageApp extends LitElement {
 
   private _processor = new ImageProcessorController(this);
 
-  @query('#images')
+  @query("#images")
   imageInput!: ImageInput;
 
-  @query('#setting')
+  @query("#setting")
   setting!: ConverterSetting;
 
-  @query('#progress')
+  @query("#progress")
   progress?: HTMLDialogElement;
 
   @state()
@@ -100,16 +106,16 @@ export class WirthMageApp extends LitElement {
   override connectedCallback(): void {
     super.connectedCallback();
 
-    document.addEventListener('dragover', this.#handleDragOver);
-    document.addEventListener('dragleave', this.#handleDragLeave);
-    document.addEventListener('drop', this.#handleDrop);
+    document.addEventListener("dragover", this.#handleDragOver);
+    document.addEventListener("dragleave", this.#handleDragLeave);
+    document.addEventListener("drop", this.#handleDrop);
   }
 
   override disconnectedCallback(): void {
     super.disconnectedCallback();
-    document.removeEventListener('dragover', this.#handleDragOver);
-    document.removeEventListener('dragleave', this.#handleDragLeave);
-    document.removeEventListener('drop', this.#handleDrop);
+    document.removeEventListener("dragover", this.#handleDragOver);
+    document.removeEventListener("dragleave", this.#handleDragLeave);
+    document.removeEventListener("drop", this.#handleDrop);
   }
 
   protected override render(): unknown {
@@ -132,7 +138,9 @@ export class WirthMageApp extends LitElement {
           id="setting"
           ?disabled="${this.isProcessing}"
         ></converter-setting>
-        ${this.#renderProcessing() ?? [this.#renderNotice(), this.#renderButtons()]}
+        ${
+      this.#renderProcessing() ?? [this.#renderNotice(), this.#renderButtons()]
+    }
       </div>
       <wirthmage-footer id="footer"></wirthmage-footer>
     `;
@@ -150,7 +158,7 @@ export class WirthMageApp extends LitElement {
 
     const total = this.imageInput.files.length;
     const message = this._processor.canceled
-      ? '変換を中止します'
+      ? "変換を中止します"
       : `進行中... (${this.processedCount}/${total})`;
 
     return html`
@@ -171,11 +179,13 @@ export class WirthMageApp extends LitElement {
   #renderNotice(): TemplateResult {
     return html`
       <div id="notice">
-        ${this.imageInput?.hasSameNames
-          ? html`<p>
+        ${
+      this.imageInput?.hasSameNames
+        ? html`<p>
               同名のファイルが入力されています。重複ファイルはサブフォルダに格納されます。
             </p>`
-          : null}
+        : null
+    }
       </div>
     `;
   }
@@ -190,47 +200,49 @@ export class WirthMageApp extends LitElement {
         >
           変換
         </button>
-        ${APP_MODE_QUERY.matches
-          ? html`<button
+        ${
+      APP_MODE_QUERY.matches
+        ? html`<button
               id="quit"
               @click=${() => window.close()}
               ?disabled=${this.isProcessing}
             >
               終了
             </button>`
-          : null}
+        : null
+    }
       </div>
     `;
   }
 
   #handleDragOver = (e: DragEvent) => {
     if (this.isProcessing) {
-      if (e.dataTransfer?.types.includes('Files')) {
-        e.dataTransfer.dropEffect = 'none';
+      if (e.dataTransfer?.types.includes("Files")) {
+        e.dataTransfer.dropEffect = "none";
       }
       return;
     }
 
-    if (e.dataTransfer?.types.includes('Files')) {
+    if (e.dataTransfer?.types.includes("Files")) {
       e.preventDefault();
-      e.dataTransfer.dropEffect = 'copy';
-      this.imageInput.toggleAttribute('dragging', true);
+      e.dataTransfer.dropEffect = "copy";
+      this.imageInput.toggleAttribute("dragging", true);
     }
   };
 
   #handleDragLeave = (e: DragEvent) => {
     if (!e.relatedTarget) {
-      this.imageInput.toggleAttribute('dragging', false);
+      this.imageInput.toggleAttribute("dragging", false);
     }
   };
 
   #handleDrop = (e: DragEvent) => {
     if (this.isProcessing) return;
 
-    if (e.dataTransfer?.types.includes('Files') && !e.defaultPrevented) {
+    if (e.dataTransfer?.types.includes("Files") && !e.defaultPrevented) {
       e.preventDefault();
       e.stopPropagation();
-      this.imageInput.toggleAttribute('dragging', false);
+      this.imageInput.toggleAttribute("dragging", false);
       this.imageInput.addFiles(e.dataTransfer.files);
     }
   };

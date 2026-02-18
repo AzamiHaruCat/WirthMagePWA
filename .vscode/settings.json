@@ -1,12 +1,12 @@
 {
   "[typescript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "dprint.dprint"
   },
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit",
     "source.sortImports": "explicit"
   },
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.defaultFormatter": "dprint.dprint",
   "editor.formatOnSave": true,
   "editor.indentSize": "tabSize",
   "editor.insertSpaces": true,

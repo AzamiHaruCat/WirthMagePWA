@@ -1,8 +1,10 @@
-import { LitElement, type PropertyValues } from 'lit';
-import { property } from 'lit/decorators.js';
+import { LitElement, type PropertyValues } from "lit";
+import { property } from "lit/decorators.js";
 
-export abstract class FormInput<T extends string | File = string> extends LitElement {
-  static defaultMissingAlert = '必須項目です';
+export abstract class FormInput<T extends string | File = string>
+  extends LitElement
+{
+  static defaultMissingAlert = "必須項目です";
 
   #values: T[] = [];
   #defaultValues: T[] = [];
@@ -25,7 +27,7 @@ export abstract class FormInput<T extends string | File = string> extends LitEle
   @property({ type: Boolean, reflect: true })
   required = false;
 
-  @property({ type: String, attribute: 'data-missing', reflect: true })
+  @property({ type: String, attribute: "data-missing", reflect: true })
   missingAlert: string | null = null;
 
   /**
@@ -49,8 +51,8 @@ export abstract class FormInput<T extends string | File = string> extends LitEle
       } else {
         this.#values[0] = val;
       }
-      this.requestUpdate('value', oldValues[0]);
-      this.requestUpdate('values', oldValues);
+      this.requestUpdate("value", oldValues[0]);
+      this.requestUpdate("values", oldValues);
     }
   }
 
@@ -64,13 +66,13 @@ export abstract class FormInput<T extends string | File = string> extends LitEle
   set values(val: Iterable<T>) {
     const oldValues = this.#values;
     this.#values = Array.from(val ?? []);
-    this.requestUpdate('values', oldValues);
+    this.requestUpdate("values", oldValues);
   }
 
   /**
    * 単一のデフォルト値をvalue属性に紐づけ
    */
-  @property({ attribute: 'value', reflect: false })
+  @property({ attribute: "value", reflect: false })
   get defaultValue(): T | null {
     return this.#defaultValues[0] ?? null;
   }
@@ -102,24 +104,26 @@ export abstract class FormInput<T extends string | File = string> extends LitEle
 
   protected override willUpdate(changedProperties: PropertyValues<this>): void {
     if (
-      changedProperties.has('name') ||
-      changedProperties.has('value') ||
-      changedProperties.has('values')
+      changedProperties.has("name")
+      || changedProperties.has("value")
+      || changedProperties.has("values")
     ) {
       this.updateFormValue();
     }
 
     if (
-      changedProperties.has('required') ||
-      changedProperties.has('missingAlert') ||
-      changedProperties.has('value') ||
-      changedProperties.has('values')
+      changedProperties.has("required")
+      || changedProperties.has("missingAlert")
+      || changedProperties.has("value")
+      || changedProperties.has("values")
     ) {
       this.updateValidity();
     }
   }
 
-  protected override firstUpdated(changedProperties: PropertyValues<this>): void {
+  protected override firstUpdated(
+    changedProperties: PropertyValues<this>,
+  ): void {
     super.firstUpdated(changedProperties);
 
     if (this.#values.length === 0 && this.#defaultValues.length > 0) {
@@ -160,15 +164,16 @@ export abstract class FormInput<T extends string | File = string> extends LitEle
    */
   updateValidity(): void {
     this._validate({
-      valueMissing:
-        this.required && (this.values.length === 0 || this.values.every((v) => !v)),
+      valueMissing: this.required
+        && (this.values.length === 0 || this.values.every((v) => !v)),
     });
   }
 
   protected _validate(flags: ValidityStateFlags): void {
     const message = flags.valueMissing
-      ? this.missingAlert || (this.constructor as typeof FormInput).defaultMissingAlert
-      : '';
+      ? this.missingAlert
+        || (this.constructor as typeof FormInput).defaultMissingAlert
+      : "";
     this.#internals.setValidity(flags, message);
   }
 }

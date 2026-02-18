@@ -1,9 +1,9 @@
-import { type ImageFile } from '@/utils/image-file';
-import { LitElement, css, html, type CSSResultGroup } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
-import './ui-icon';
+import { type ImageFile } from "@/utils/image-file";
+import { css, type CSSResultGroup, html, LitElement } from "lit";
+import { customElement, property } from "lit/decorators.js";
+import "./ui-icon";
 
-const TAG_NAME = 'image-item';
+const TAG_NAME = "image-item";
 
 @customElement(TAG_NAME)
 export class ImageItem extends LitElement {
@@ -81,7 +81,7 @@ export class ImageItem extends LitElement {
 
   #dispatchRemove = (): void => {
     this.dispatchEvent(
-      new CustomEvent('remove', {
+      new CustomEvent("remove", {
         bubbles: true,
         composed: true,
         detail: { id: this.data?.id },

@@ -4,7 +4,7 @@ export const getDirectoryHandle = async (
   try {
     return await window.showDirectoryPicker(options);
   } catch (e) {
-    if (e instanceof Error && e.name === 'AbortError') return;
+    if (e instanceof Error && e.name === "AbortError") return;
     console.error(e);
   }
 };

@@ -1,13 +1,17 @@
-import { FormInput } from '@/components/abstract/form-input';
-import { BUTTON_STYLE } from '@/styles/button.style';
-import { getImageMeta, revokeImageFile, type ImageFile } from '@/utils/image-file';
-import { css, html, type CSSResultGroup, type PropertyValues } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
-import { repeat } from 'lit/directives/repeat.js';
-import './image-item';
-import type { ImageItem } from './image-item';
+import { FormInput } from "@/components/abstract/form-input";
+import { BUTTON_STYLE } from "@/styles/button.style";
+import {
+  getImageMeta,
+  type ImageFile,
+  revokeImageFile,
+} from "@/utils/image-file";
+import { css, type CSSResultGroup, html, type PropertyValues } from "lit";
+import { customElement, state } from "lit/decorators.js";
+import { repeat } from "lit/directives/repeat.js";
+import "./image-item";
+import type { ImageItem } from "./image-item";
 
-const TAG_NAME = 'image-input';
+const TAG_NAME = "image-input";
 
 @customElement(TAG_NAME)
 export class ImageInput extends FormInput<File> {
@@ -75,7 +79,7 @@ export class ImageInput extends FormInput<File> {
 
   protected override willUpdate(changedProperties: PropertyValues<this>): void {
     super.willUpdate(changedProperties);
-    if (changedProperties.has('value') || changedProperties.has('values')) {
+    if (changedProperties.has("value") || changedProperties.has("values")) {
       this.#updateMetaData();
     }
   }
@@ -105,11 +109,14 @@ export class ImageInput extends FormInput<File> {
           クリア
         </button>
         <ul part="list" @remove=${this.#handleFileRemove}>
-          ${repeat(
-            this._metaData,
-            ({ file }) => `${file.name}-${file.size}-${file.lastModified}`,
-            (meta) => html`<li part="item"><image-item .data=${meta}></image-item></li>`,
-          )}
+          ${
+      repeat(
+        this._metaData,
+        ({ file }) => `${file.name}-${file.size}-${file.lastModified}`,
+        (meta) =>
+          html`<li part="item"><image-item .data=${meta}></image-item></li>`,
+      )
+    }
         </ul>
       </div>
     `;
@@ -121,7 +128,7 @@ export class ImageInput extends FormInput<File> {
     const filesArray = Array.from(newFiles);
     if (filesArray.length === 0) return;
 
-    const imageFiles = filesArray.filter((f) => f.type.startsWith('image/'));
+    const imageFiles = filesArray.filter((f) => f.type.startsWith("image/"));
     if (imageFiles.length === 0) return;
 
     const updatedWithMeta = this.values.map((file, index) => ({ file, index }));
@@ -129,9 +136,9 @@ export class ImageInput extends FormInput<File> {
     for (const file of imageFiles) {
       const isDuplicate = this.values.some(
         (f) =>
-          f.name === file.name &&
-          f.size === file.size &&
-          f.lastModified === file.lastModified,
+          f.name === file.name
+          && f.size === file.size
+          && f.lastModified === file.lastModified,
       );
       if (!isDuplicate) {
         updatedWithMeta.push({ file, index: updatedWithMeta.length });
@@ -163,7 +170,7 @@ export class ImageInput extends FormInput<File> {
       const meta = oldDataMap.get(file) ?? (await getImageMeta(file));
       newData.push(meta);
 
-      const baseName = file.name.replace(/\.\w+$/, '');
+      const baseName = file.name.replace(/\.\w+$/, "");
       nameCounts.set(baseName, (nameCounts.get(baseName) ?? 0) + 1);
     }
 
@@ -178,11 +185,13 @@ export class ImageInput extends FormInput<File> {
       if (!newFiles.has(meta.file)) revokeImageFile(meta);
     }
 
-    this.#hasDuplicateNames = Array.from(nameCounts.values()).some((count) => count > 1);
+    this.#hasDuplicateNames = Array.from(nameCounts.values()).some((count) =>
+      count > 1
+    );
     this._metaData = Object.freeze(newData);
 
     this.dispatchEvent(
-      new CustomEvent('update', {
+      new CustomEvent("update", {
         bubbles: true,
         composed: true,
         detail: newData,
@@ -193,24 +202,24 @@ export class ImageInput extends FormInput<File> {
   #handleDragOver = (e: DragEvent): void => {
     if (this.disabled) return;
 
-    if (e.dataTransfer?.types.includes('Files')) {
+    if (e.dataTransfer?.types.includes("Files")) {
       e.preventDefault();
-      e.dataTransfer.dropEffect = 'copy';
-      this.toggleAttribute('dragging', true);
+      e.dataTransfer.dropEffect = "copy";
+      this.toggleAttribute("dragging", true);
     }
   };
 
   #handleDragLeave = (_e: DragEvent): void => {
-    this.toggleAttribute('dragging', false);
+    this.toggleAttribute("dragging", false);
   };
 
   #handleDrop = (e: DragEvent) => {
     if (this.disabled) return;
 
-    if (e.dataTransfer?.types.includes('Files') && !e.defaultPrevented) {
+    if (e.dataTransfer?.types.includes("Files") && !e.defaultPrevented) {
       e.preventDefault();
       e.stopPropagation();
-      this.toggleAttribute('dragging', false);
+      this.toggleAttribute("dragging", false);
       this.addFiles(e.dataTransfer.files);
     }
   };
@@ -219,7 +228,7 @@ export class ImageInput extends FormInput<File> {
     const input = e.target as HTMLInputElement;
     if (input.files) {
       this.addFiles(input.files);
-      input.value = '';
+      input.value = "";
     }
   };
 
@@ -232,7 +241,7 @@ export class ImageInput extends FormInput<File> {
 
   #dispatchChange = (): void => {
     this.dispatchEvent(
-      new CustomEvent('change', {
+      new CustomEvent("change", {
         bubbles: true,
         composed: true,
         detail: { files: this.values },

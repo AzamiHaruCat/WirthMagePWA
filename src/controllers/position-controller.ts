@@ -1,4 +1,4 @@
-import type { ReactiveController, ReactiveControllerHost } from 'lit';
+import type { ReactiveController, ReactiveControllerHost } from "lit";
 
 export class PositionController implements ReactiveController {
   readonly host: ReactiveControllerHost;
@@ -14,8 +14,8 @@ export class PositionController implements ReactiveController {
     const { y, height } = source.getBoundingClientRect();
     const currentPosition = y + height / 2;
     const locatedAtBottom = clientHeight / 2 < currentPosition;
-    if (locatedAtBottom !== target.hasAttribute('data-top')) {
-      target.toggleAttribute('data-top');
+    if (locatedAtBottom !== target.hasAttribute("data-top")) {
+      target.toggleAttribute("data-top");
     }
   }
 }

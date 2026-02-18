@@ -32,7 +32,9 @@ export const getImageMeta = (file: File): Promise<ImageFile> => {
 
 export const getImageMetaAll = async (files: File[]): Promise<ImageFile[]> => {
   return (await Promise.allSettled(files.map((file) => getImageMeta(file))))
-    .filter((r): r is PromiseFulfilledResult<ImageFile> => r.status === 'fulfilled')
+    .filter((r): r is PromiseFulfilledResult<ImageFile> =>
+      r.status === "fulfilled"
+    )
     .map((r) => r.value);
 };
 
@@ -40,11 +42,13 @@ export const revokeImageFile = (image: ImageFile): void => {
   URL.revokeObjectURL(image.previewUrl);
 };
 
-export const fileToCanvas = async (item: ImageFile): Promise<OffscreenCanvas> => {
+export const fileToCanvas = async (
+  item: ImageFile,
+): Promise<OffscreenCanvas> => {
   const canvas = new OffscreenCanvas(item.width, item.height);
 
   const bitmap = await createImageBitmap(item.file);
-  canvas.getContext('2d')!.drawImage(bitmap, 0, 0);
+  canvas.getContext("2d")!.drawImage(bitmap, 0, 0);
   bitmap.close();
 
   return canvas;

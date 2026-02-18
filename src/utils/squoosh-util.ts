@@ -1,10 +1,10 @@
-import _decodeJPEG, { init as initDecodeJPEG } from '@jsquash/jpeg/decode';
-import _encodeJPEG, { init as initEncodeJPEG } from '@jsquash/jpeg/encode';
-import type { DecodeOptions, EncodeOptions } from '@jsquash/jpeg/meta';
-import { optimise as _optimisePNG } from '@jsquash/oxipng';
-import type { OptimiseOptions } from '@jsquash/oxipng/meta';
-import { init as initPNG } from '@jsquash/oxipng/optimise';
-import resize from '@jsquash/resize';
+import _decodeJPEG, { init as initDecodeJPEG } from "@jsquash/jpeg/decode";
+import _encodeJPEG, { init as initEncodeJPEG } from "@jsquash/jpeg/encode";
+import type { DecodeOptions, EncodeOptions } from "@jsquash/jpeg/meta";
+import { optimise as _optimisePNG } from "@jsquash/oxipng";
+import type { OptimiseOptions } from "@jsquash/oxipng/meta";
+import { init as initPNG } from "@jsquash/oxipng/optimise";
+import resize from "@jsquash/resize";
 
 export { resize };
 

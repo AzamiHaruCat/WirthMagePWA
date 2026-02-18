@@ -1,19 +1,23 @@
-import { encodePNG } from '@/utils/encode-png';
-import { resize } from '@/utils/squoosh-util';
-import * as iq from 'image-q';
-import { Dimension, DimensionPreset, type DimensionPresetType } from './dimension';
-import { encodeBMP } from './encode-bmp';
+import { encodePNG } from "@/utils/encode-png";
+import { resize } from "@/utils/squoosh-util";
+import * as iq from "image-q";
+import {
+  Dimension,
+  DimensionPreset,
+  type DimensionPresetType,
+} from "./dimension";
+import { encodeBMP } from "./encode-bmp";
 import {
   applyBinaryAlpha,
   applyUnsharpMask,
   calculateCenterCrop,
   drawOutline,
-  updateCanvasImageData,
   type OutlineStyle,
-} from './image-utils';
+  updateCanvasImageData,
+} from "./image-utils";
 
 export interface ConvertOptions {
-  imageSize?: DimensionPresetType | 'ASIS';
+  imageSize?: DimensionPresetType | "ASIS";
   scale?: number;
   colors?: number;
   mask?: boolean;
@@ -32,13 +36,13 @@ export class ImageProcessor {
     this.lastPalette = null;
 
     const canvas = new OffscreenCanvas(sourceCanvas.width, sourceCanvas.height);
-    const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
+    const ctx = canvas.getContext("2d", { willReadFrequently: true })!;
     ctx.drawImage(sourceCanvas, 0, 0);
 
     const bgColor = options.mask ? this.mask(canvas) : null;
 
-    const { imageSize = 'ASIS', scale = 1 } = options;
-    if (imageSize !== 'ASIS') {
+    const { imageSize = "ASIS", scale = 1 } = options;
+    if (imageSize !== "ASIS") {
       const dimension = DimensionPreset[imageSize].scale(scale);
       await this.resize(canvas, dimension);
 
@@ -84,8 +88,13 @@ export class ImageProcessor {
     return `rgb(${r},${g},${b})`;
   }
 
-  private async resize(canvas: OffscreenCanvas, dimension: Dimension): Promise<void> {
-    if (canvas.width === dimension.width && canvas.height === dimension.height) {
+  private async resize(
+    canvas: OffscreenCanvas,
+    dimension: Dimension,
+  ): Promise<void> {
+    if (
+      canvas.width === dimension.width && canvas.height === dimension.height
+    ) {
       return;
     }
 
@@ -96,13 +105,18 @@ export class ImageProcessor {
       dimension.height,
     );
 
-    const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
-    const inputImageData = ctx.getImageData(rect.x, rect.y, rect.width, rect.height);
+    const ctx = canvas.getContext("2d", { willReadFrequently: true })!;
+    const inputImageData = ctx.getImageData(
+      rect.x,
+      rect.y,
+      rect.width,
+      rect.height,
+    );
 
     let outputImageData = await resize(inputImageData, {
       width: dimension.width,
       height: dimension.height,
-      method: 'mitchell',
+      method: "mitchell",
     });
 
     if (dimension.pixels < 0x8000) {
@@ -114,12 +128,15 @@ export class ImageProcessor {
     ctx.putImageData(outputImageData, 0, 0);
   }
 
-  private async quantize(canvas: OffscreenCanvas, colors: number): Promise<void> {
+  private async quantize(
+    canvas: OffscreenCanvas,
+    colors: number,
+  ): Promise<void> {
     updateCanvasImageData(canvas, (data) => {
       const inPointContainer = iq.utils.PointContainer.fromImageData(data);
 
       const palette = iq.buildPaletteSync([inPointContainer], {
-        paletteQuantization: 'wuquant',
+        paletteQuantization: "wuquant",
         colors: Math.max(2, Math.min(256, Math.round(colors))),
       });
 
@@ -127,7 +144,10 @@ export class ImageProcessor {
         new iq.distance.Euclidean(),
         iq.image.ErrorDiffusionArrayKernel.FloydSteinberg,
       );
-      const outPointContainer = imageQuantizer.quantizeSync(inPointContainer, palette);
+      const outPointContainer = imageQuantizer.quantizeSync(
+        inPointContainer,
+        palette,
+      );
 
       this.lastIndexedContainer = outPointContainer;
       this.lastPalette = palette;
@@ -144,13 +164,13 @@ export class ImageProcessor {
    * 最終的なピクセルデータからBMP用のパレットとインデックスを生成
    */
   private refreshFinalData(canvas: OffscreenCanvas, colors: number): void {
-    const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
+    const ctx = canvas.getContext("2d", { willReadFrequently: true })!;
     const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const container = iq.utils.PointContainer.fromImageData(data);
 
     if (colors > 0) {
       const tempPalette = iq.buildPaletteSync([container], {
-        paletteQuantization: 'wuquant',
+        paletteQuantization: "wuquant",
         colors: colors,
       });
       const points = container.getPointArray();
@@ -174,7 +194,10 @@ export class ImageProcessor {
 
       const distance = new iq.distance.Euclidean();
       const modifier = new iq.image.NearestColor(distance);
-      this.lastIndexedContainer = modifier.quantizeSync(container, this.lastPalette);
+      this.lastIndexedContainer = modifier.quantizeSync(
+        container,
+        this.lastPalette,
+      );
     } else {
       this.lastIndexedContainer = container;
       this.lastPalette = null;
@@ -185,11 +208,11 @@ export class ImageProcessor {
    * 透過部分を背景色で塗りつぶす
    */
   private flattenBackground(canvas: OffscreenCanvas, bgColor: string): void {
-    const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
-    ctx.globalCompositeOperation = 'destination-over';
+    const ctx = canvas.getContext("2d", { willReadFrequently: true })!;
+    ctx.globalCompositeOperation = "destination-over";
     ctx.fillStyle = bgColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalCompositeOperation = "source-over";
   }
 
   /**
@@ -197,7 +220,7 @@ export class ImageProcessor {
    */
   public encodeBMP(): Blob {
     if (!this.lastIndexedContainer) {
-      throw new Error('処理済みのデータがありません。');
+      throw new Error("処理済みのデータがありません。");
     }
     return encodeBMP(this.lastIndexedContainer, this.lastPalette);
   }
@@ -207,7 +230,7 @@ export class ImageProcessor {
    */
   public encodePNG(mask: boolean = false): Promise<Blob> {
     if (!this.lastIndexedContainer || !this.lastPalette) {
-      throw new Error('データが不足しています。');
+      throw new Error("データが不足しています。");
     }
 
     return encodePNG(this.lastIndexedContainer, this.lastPalette, mask);

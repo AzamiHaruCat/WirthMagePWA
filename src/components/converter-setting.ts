@@ -1,25 +1,28 @@
-import type { FormInput } from '@/components/abstract/form-input';
-import { requestSave, StorageController } from '@/controllers/storage-controller';
-import type { JsonObject, Serializable } from '@/interfaces/serializable';
-import { LABEL_HAS_CHECKS_STYLE } from '@/styles/label-has-checks.style';
-import { type DimensionPresetType } from '@/utils/dimension';
-import type { OutlineStyle } from '@/utils/image-utils';
+import type { FormInput } from "@/components/abstract/form-input";
+import {
+  requestSave,
+  StorageController,
+} from "@/controllers/storage-controller";
+import type { JsonObject, Serializable } from "@/interfaces/serializable";
+import { LABEL_HAS_CHECKS_STYLE } from "@/styles/label-has-checks.style";
+import { type DimensionPresetType } from "@/utils/dimension";
+import type { OutlineStyle } from "@/utils/image-utils";
 import {
   css,
-  html,
-  LitElement,
   type CSSResultGroup,
+  html,
   type HTMLTemplateResult,
+  LitElement,
   type PropertyValues,
-} from 'lit';
-import { customElement, property } from 'lit/decorators.js';
-import { repeat } from 'lit/directives/repeat.js';
-import './custom-select';
-import './image-input';
+} from "lit";
+import { customElement, property } from "lit/decorators.js";
+import { repeat } from "lit/directives/repeat.js";
+import "./custom-select";
+import "./image-input";
 
-const TAG_NAME = 'converter-setting';
+const TAG_NAME = "converter-setting";
 
-const OUTPUT_TYPES = ['BMP', 'PNG', 'JPEG'] as const;
+const OUTPUT_TYPES = ["BMP", "PNG", "JPEG"] as const;
 export type OutputType = (typeof OUTPUT_TYPES)[number];
 
 const BLACK = [0, 0, 0] as const;
@@ -28,14 +31,14 @@ const WHITE = [255, 255, 255] as const;
 const OUTLINE_STYLES: Record<string, OutlineStyle> = {
   黒: { inner: BLACK },
   白: { inner: WHITE },
-  '黒(外側)': { outer: BLACK },
-  '白(外側)': { outer: WHITE },
-  '黒+白(外側)': { inner: BLACK, outer: WHITE },
-  '白+黒(外側)': { inner: WHITE, outer: BLACK },
+  "黒(外側)": { outer: BLACK },
+  "白(外側)": { outer: WHITE },
+  "黒+白(外側)": { inner: BLACK, outer: WHITE },
+  "白+黒(外側)": { inner: WHITE, outer: BLACK },
 } as const;
 
 interface SettingData extends JsonObject {
-  outputSize: DimensionPresetType | 'ASIS';
+  outputSize: DimensionPresetType | "ASIS";
   scaleX2: boolean;
   scaleX4: boolean;
   outputType: OutputType;
@@ -45,7 +48,9 @@ interface SettingData extends JsonObject {
 }
 
 @customElement(TAG_NAME)
-export class ConverterSetting extends LitElement implements Serializable<SettingData> {
+export class ConverterSetting extends LitElement
+  implements Serializable<SettingData>
+{
   static override styles?: CSSResultGroup = css`
     :host {
       display: flex;
@@ -91,7 +96,7 @@ export class ConverterSetting extends LitElement implements Serializable<Setting
   private _storage = new StorageController(this);
 
   @property()
-  outputSize: DimensionPresetType | 'ASIS' = 'ASIS';
+  outputSize: DimensionPresetType | "ASIS" = "ASIS";
 
   @property({ type: Boolean })
   scaleX2 = false;
@@ -100,7 +105,7 @@ export class ConverterSetting extends LitElement implements Serializable<Setting
   scaleX4 = false;
 
   @property()
-  outputType: OutputType = 'BMP';
+  outputType: OutputType = "BMP";
 
   @property({ type: Number })
   colors = 0;
@@ -109,19 +114,21 @@ export class ConverterSetting extends LitElement implements Serializable<Setting
   mask = false;
 
   @property()
-  outline: string = '';
+  outline: string = "";
 
   get outlineStyle(): OutlineStyle {
     return { ...(OUTLINE_STYLES[this.outline] ?? null) };
   }
 
   serialize(): SettingData {
-    const { outputSize, scaleX2, scaleX4, outputType, colors, mask, outline } = this;
+    const { outputSize, scaleX2, scaleX4, outputType, colors, mask, outline } =
+      this;
     return { outputSize, scaleX2, scaleX4, outputType, colors, mask, outline };
   }
 
   unserialize(value: SettingData): void {
-    const { outputSize, scaleX2, scaleX4, outputType, colors, mask, outline } = value;
+    const { outputSize, scaleX2, scaleX4, outputType, colors, mask, outline } =
+      value;
     this.outputSize = outputSize ?? this.outputSize;
     this.scaleX2 = scaleX2 ?? this.scaleX2;
     this.scaleX4 = scaleX4 ?? this.scaleX4;
@@ -140,19 +147,21 @@ export class ConverterSetting extends LitElement implements Serializable<Setting
     ];
   }
 
-  protected override firstUpdated(_changedProperties: PropertyValues<this>): void {
+  protected override firstUpdated(
+    _changedProperties: PropertyValues<this>,
+  ): void {
     this.updateComplete.then(() => this._storage.load());
   }
 
   protected override updated(changedProperties: PropertyValues<this>): void {
     const keys = [
-      'outputSize',
-      'scaleX2',
-      'scaleX4',
-      'outputType',
-      'colors',
-      'mask',
-      'outline',
+      "outputSize",
+      "scaleX2",
+      "scaleX4",
+      "outputType",
+      "colors",
+      "mask",
+      "outline",
     ] as (keyof ConverterSetting)[];
     const shouldSave = keys.some((key) => changedProperties.has(key));
     if (shouldSave) requestSave(this);
@@ -162,15 +171,17 @@ export class ConverterSetting extends LitElement implements Serializable<Setting
     return html`
       <div part="size">
         <strong>出力サイズ:</strong>
-        ${repeat(
-          Object.entries({
-            ASIS: 'そのまま',
-            CARD: 'カード',
-            YADO: '冒険者の宿',
-            FULL: 'フルサイズ',
-          }) as [typeof this.outputSize, string][],
-          ([key]) => key,
-          ([key, value]) => html`
+        ${
+      repeat(
+        Object.entries({
+          ASIS: "そのまま",
+          CARD: "カード",
+          YADO: "冒険者の宿",
+          FULL: "フルサイズ",
+        }) as [typeof this.outputSize, string][],
+        ([key]) => key,
+        ([key, value]) =>
+          html`
             <label>
               <input
                 name="size"
@@ -180,13 +191,14 @@ export class ConverterSetting extends LitElement implements Serializable<Setting
               />${value}
             </label>
           `,
-        )}
+      )
+    }
         <label>
           <input
             name="x2"
             type="checkbox"
             ?checked=${this.scaleX2}
-            ?disabled=${this.outputSize === 'ASIS'}
+            ?disabled=${this.outputSize === "ASIS"}
             @change=${() => (this.scaleX2 = !this.scaleX2)}
           />2倍サイズ
         </label>
@@ -195,7 +207,7 @@ export class ConverterSetting extends LitElement implements Serializable<Setting
             name="x4"
             type="checkbox"
             ?checked=${this.scaleX4}
-            ?disabled=${this.outputSize === 'ASIS'}
+            ?disabled=${this.outputSize === "ASIS"}
             @change=${() => (this.scaleX4 = !this.scaleX4)}
           />4倍サイズ
         </label>
@@ -207,10 +219,12 @@ export class ConverterSetting extends LitElement implements Serializable<Setting
     return html`
       <div part="type">
         <strong>出力形式:</strong>
-        ${repeat(
-          OUTPUT_TYPES,
-          (key) => key,
-          (key) => html`
+        ${
+      repeat(
+        OUTPUT_TYPES,
+        (key) => key,
+        (key) =>
+          html`
             <label>
               <input
                 name="type"
@@ -220,7 +234,8 @@ export class ConverterSetting extends LitElement implements Serializable<Setting
               />${key}
             </label>
           `,
-        )}
+      )
+    }
       </div>
     `;
   }
@@ -234,10 +249,10 @@ export class ConverterSetting extends LitElement implements Serializable<Setting
             name="colors"
             .value=${String(this.colors) as any}
             @input=${(e: Event) => {
-              const input = e.target as FormInput<string>;
-              this.colors = Number(input.value ?? 0);
-            }}
-            ?disabled=${this.outputType === 'JPEG'}
+      const input = e.target as FormInput<string>;
+      this.colors = Number(input.value ?? 0);
+    }}
+            ?disabled=${this.outputType === "JPEG"}
           >
             <span value="0">なし</span>
             <span value="256">256色 (8-bit)</span>
@@ -255,7 +270,7 @@ export class ConverterSetting extends LitElement implements Serializable<Setting
             name="mask"
             type="checkbox"
             ?checked=${this.mask}
-            ?disabled=${this.outputType === 'JPEG'}
+            ?disabled=${this.outputType === "JPEG"}
             @change=${() => (this.mask = !this.mask)}
           />透過色を保護
         </label>
@@ -272,17 +287,19 @@ export class ConverterSetting extends LitElement implements Serializable<Setting
             name="outline"
             .value=${this.outline as any}
             @input=${(e: Event) => {
-              const input = e.target as FormInput<string>;
-              this.outline = input.value ?? '';
-            }}
-            ?disabled=${!this.mask || this.outputType === 'JPEG'}
+      const input = e.target as FormInput<string>;
+      this.outline = input.value ?? "";
+    }}
+            ?disabled=${!this.mask || this.outputType === "JPEG"}
           >
             <span value="">なし</span>
-            ${repeat(
-              Object.keys(OUTLINE_STYLES),
-              (key) => key,
-              (key) => html`<span value="${key}">${key}</span>`,
-            )}
+            ${
+      repeat(
+        Object.keys(OUTLINE_STYLES),
+        (key) => key,
+        (key) => html`<span value="${key}">${key}</span>`,
+      )
+    }
           </custom-select>
         </label>
       </div>

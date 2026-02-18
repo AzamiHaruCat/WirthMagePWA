@@ -1,4 +1,4 @@
-import * as iq from 'image-q';
+import * as iq from "image-q";
 
 export const encodeBMP = (
   container: iq.utils.PointContainer,
@@ -103,5 +103,5 @@ export const encodeBMP = (
     }
   }
 
-  return new Blob([buffer], { type: 'image/bmp' });
+  return new Blob([buffer], { type: "image/bmp" });
 };

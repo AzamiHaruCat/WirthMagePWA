@@ -1,6 +1,6 @@
-import { optimisePNG } from '@/utils/squoosh-util';
-import * as iq from 'image-q';
-import UPNG from 'upng-js';
+import { optimisePNG } from "@/utils/squoosh-util";
+import * as iq from "image-q";
+import UPNG from "upng-js";
 
 export const encodePNG = async (
   container: iq.utils.PointContainer,
@@ -28,9 +28,9 @@ export const encodePNG = async (
 
   try {
     const optimisedBuffer = await optimisePNG(buffer, { level: 2 });
-    return new Blob([optimisedBuffer], { type: 'image/png' });
+    return new Blob([optimisedBuffer], { type: "image/png" });
   } catch (e) {
     console.error(e);
-    return new Blob([buffer], { type: 'image/png' });
+    return new Blob([buffer], { type: "image/png" });
   }
 };

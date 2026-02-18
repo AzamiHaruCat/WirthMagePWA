@@ -1,11 +1,11 @@
-import { ImageProcessor, type ConvertOptions } from '@/utils/image-processor';
+import { type ConvertOptions, ImageProcessor } from "@/utils/image-processor";
 
 const processor = new ImageProcessor();
 
 export interface WorkerInput {
   file: File;
   options: ConvertOptions;
-  outputType: 'BMP' | 'PNG' | 'JPEG';
+  outputType: "BMP" | "PNG" | "JPEG";
 }
 
 export interface WorkerOutput {
@@ -14,44 +14,59 @@ export interface WorkerOutput {
 }
 
 const tasks: WorkerInput[] = [];
+let isProcessing = false;
 
-const processTask = async () => {
-  const { file, options, outputType } = tasks[0];
+async function startProcess(): Promise<void> {
+  if (isProcessing || tasks.length === 0) return;
+  isProcessing = true;
+
+  const { postMessage } = self as unknown as Worker;
+
+  while (tasks.length > 0) {
+    try {
+      await processTask();
+    } catch (err) {
+      postMessage({ error: (err as Error).message } satisfies WorkerOutput);
+    }
+  }
+
+  isProcessing = false;
+}
+
+async function processTask(): Promise<void> {
+  const { file, options, outputType } = tasks.shift()!;
+  const { postMessage } = self as unknown as Worker;
+
+  let imageBitmap: ImageBitmap | null = null;
 
   try {
-    const imageBitmap = await createImageBitmap(file, {
-      colorSpaceConversion: 'none',
+    imageBitmap = await createImageBitmap(file, {
+      colorSpaceConversion: "none",
     });
     const canvas = await processor.process(imageBitmap, options);
 
     let blob: Blob;
-    if (outputType === 'BMP') {
+    if (outputType === "BMP") {
       blob = processor.encodeBMP();
-    } else if (outputType === 'PNG' && options.colors) {
+    } else if (outputType === "PNG" && options.colors) {
       blob = await processor.encodePNG(!!options.mask);
     } else {
-      const mime = outputType === 'JPEG' ? 'image/jpeg' : 'image/png';
-      const quality = outputType === 'JPEG' ? 0.85 : undefined;
+      const mime = outputType === "JPEG" ? "image/jpeg" : "image/png";
+      const quality = outputType === "JPEG" ? 0.85 : undefined;
       blob = await canvas.convertToBlob({ type: mime, quality });
     }
 
-    imageBitmap.close();
     canvas.width = canvas.height = 0;
-
-    const output: WorkerOutput = { blob };
-    self.postMessage(output);
+    postMessage({ blob } satisfies WorkerOutput);
   } catch (err) {
-    const error = (err as Error).message ?? 'Unknown error';
-    const output: WorkerOutput = { error };
-    self.postMessage(output);
+    const error = (err as Error).message ?? "Unknown error";
+    postMessage({ error } satisfies WorkerOutput);
+  } finally {
+    imageBitmap?.close();
   }
+}
 
-  tasks.shift();
-};
-
-self.onmessage = async (e: MessageEvent<WorkerInput>) => {
+self.onmessage = (e: MessageEvent<WorkerInput>): void => {
   tasks.push(e.data);
-  if (tasks.length > 1) return;
-
-  while (tasks.length > 0) await processTask();
+  startProcess();
 };

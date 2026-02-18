@@ -41,7 +41,7 @@ export const updateCanvasImageData = (
   canvas: HTMLCanvasElement | OffscreenCanvas,
   processor: (data: ImageData) => void | ImageData,
 ) => {
-  const ctx = canvas.getContext('2d', { willReadFrequently: true }) as
+  const ctx = canvas.getContext("2d", { willReadFrequently: true }) as
     | CanvasRenderingContext2D
     | OffscreenCanvasRenderingContext2D
     | null;
@@ -56,7 +56,7 @@ export const updateCanvasImageData = (
  * 色をrgb配列にする（Worker非対応）
  */
 export const parseColor = (color: string): RGB => {
-  const temp = document.createElement('div');
+  const temp = document.createElement("div");
   temp.style.color = color;
   document.body.append(temp);
   const style = window.getComputedStyle(temp).color;
@@ -79,7 +79,10 @@ export const applyBinaryAlpha = (imageData: ImageData): void => {
 /**
  * 縁取り処理
  */
-export const drawOutline = (imageData: ImageData, style: OutlineStyle): ImageData => {
+export const drawOutline = (
+  imageData: ImageData,
+  style: OutlineStyle,
+): ImageData => {
   const { width, height, data } = imageData;
   const mask = new Uint8Array(width * height);
   for (let i = 0; i < mask.length; i++) {
@@ -99,11 +102,10 @@ export const drawOutline = (imageData: ImageData, style: OutlineStyle): ImageDat
 
       // Outer (外側1px)
       if (!isOpaque && outerRGB) {
-        const hasOpaqueNeighbor =
-          (x > 0 && mask[i - 1] >= 128) ||
-          (x < width - 1 && mask[i + 1] >= 128) ||
-          (y > 0 && mask[i - width] >= 128) ||
-          (y < height - 1 && mask[i + width] >= 128);
+        const hasOpaqueNeighbor = (x > 0 && mask[i - 1] >= 128)
+          || (x < width - 1 && mask[i + 1] >= 128)
+          || (y > 0 && mask[i - width] >= 128)
+          || (y < height - 1 && mask[i + width] >= 128);
 
         if (hasOpaqueNeighbor) {
           const idx = i * 4;
@@ -116,11 +118,10 @@ export const drawOutline = (imageData: ImageData, style: OutlineStyle): ImageDat
 
       // Inner (内側1px)
       if (isOpaque && innerRGB) {
-        const hasTransparentNeighbor =
-          (x > 0 && mask[i - 1] < 128) ||
-          (x < width - 1 && mask[i + 1] < 128) ||
-          (y > 0 && mask[i - width] < 128) ||
-          (y < height - 1 && mask[i + width] < 128);
+        const hasTransparentNeighbor = (x > 0 && mask[i - 1] < 128)
+          || (x < width - 1 && mask[i + 1] < 128)
+          || (y > 0 && mask[i - width] < 128)
+          || (y < height - 1 && mask[i + width] < 128);
 
         if (hasTransparentNeighbor) {
           const idx = i * 4;

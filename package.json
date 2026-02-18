@@ -8,7 +8,8 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "lint": "eslint src/**/*.ts",
-    "format": "prettier --write \"src/**/*.{ts,css,html}\""
+    "check": "dprint check",
+    "format": "dprint fmt"
   },
   "dependencies": {
     "@jsquash/jpeg": "^1.6.0",
@@ -22,11 +23,10 @@
     "@types/node": "^25.1.0",
     "@types/upng-js": "^2.1.5",
     "@types/wicg-file-system-access": "^2023.10.7",
-    "eslint": "^9.39.2",
-    "eslint-config-prettier": "^10.1.8",
-    "prettier": "^3.8.1",
+    "eslint": "^4.1.1",
     "typescript": "~5.9.3",
     "vite": "^7.2.4",
     "vite-plugin-pwa": "^1.2.0"
-  }
+  },
+  "packageManager": "pnpm@10.29.1+sha512.48dae233635a645768a3028d19545cacc1688639eeb1f3734e42d6d6b971afbf22aa1ac9af52a173d9c3a20c15857cfa400f19994d79a2f626fcc73fccda9bbc"
 }

@@ -1,7 +1,6 @@
 {
   "recommendations": [
     "runem.lit-plugin",
-    "esbenp.prettier-vscode",
     "dbaeumer.vscode-eslint",
     "ms-vscode.vscode-typescript-next"
   ]

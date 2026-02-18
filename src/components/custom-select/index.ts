@@ -1,15 +1,15 @@
-import { FormInput } from '@/components/abstract/form-input';
-import { KeyboardController } from '@/controllers/keyboard-controller';
-import { PositionController } from '@/controllers/position-controller';
-import { html, type PropertyValues } from 'lit';
+import { FormInput } from "@/components/abstract/form-input";
+import { KeyboardController } from "@/controllers/keyboard-controller";
+import { PositionController } from "@/controllers/position-controller";
+import { html, type PropertyValues } from "lit";
 import {
   customElement,
   property,
   query,
   queryAssignedElements,
   state,
-} from 'lit/decorators.js';
-import { STYLE } from './style';
+} from "lit/decorators.js";
+import { STYLE } from "./style";
 import {
   ACTIVE_SELECTOR,
   getIdOrRandomId,
@@ -17,9 +17,9 @@ import {
   IGNORE_SELECTOR,
   SELECTED_SELECTOR,
   SLOTTED_SELECTOR,
-} from './utils';
+} from "./utils";
 
-const TAG_NAME = 'custom-select';
+const TAG_NAME = "custom-select";
 
 @customElement(TAG_NAME)
 export class CustomSelect extends FormInput<string> {
@@ -41,19 +41,19 @@ export class CustomSelect extends FormInput<string> {
   @property({ type: Boolean, reflect: true })
   multiple = false;
 
-  @query('#container')
+  @query("#container")
   containerPart!: HTMLElement;
 
-  @query('#listbox')
+  @query("#listbox")
   listboxPart!: HTMLElement;
 
-  @query('#label')
+  @query("#label")
   labelPart!: HTMLElement;
 
-  @queryAssignedElements({ slot: 'selected' })
+  @queryAssignedElements({ slot: "selected" })
   protected _assignedSelected!: HTMLElement[];
 
-  @queryAssignedElements({ selector: '[aria-selected="true"]' })
+  @queryAssignedElements({ selector: "[aria-selected=\"true\"]" })
   protected _unassignedSelected!: HTMLElement[];
 
   get allOptions() {
@@ -76,21 +76,21 @@ export class CustomSelect extends FormInput<string> {
     if (target === currentNode) return;
 
     if (currentNode) {
-      currentNode.toggleAttribute('data-active', false);
+      currentNode.toggleAttribute("data-active", false);
     }
 
     if (target?.parentElement === this) {
-      target.toggleAttribute('data-active', true);
+      target.toggleAttribute("data-active", true);
 
       const id = getIdOrRandomId(target);
-      this.containerPart.setAttribute('aria-activedescendant', id);
+      this.containerPart.setAttribute("aria-activedescendant", id);
     } else {
-      this.containerPart?.removeAttribute('aria-activedescendant');
+      this.containerPart?.removeAttribute("aria-activedescendant");
 
       if (!currentNode) return;
     }
 
-    this.requestUpdate('activeOption', currentNode);
+    this.requestUpdate("activeOption", currentNode);
   }
 
   constructor() {
@@ -116,44 +116,44 @@ export class CustomSelect extends FormInput<string> {
     };
 
     this.defaultValues = this.allOptions
-      .filter((node) => node.matches('[slot="selected"]'))
+      .filter((node) => node.matches("[slot=\"selected\"]"))
       .map(getValue);
   }
 
   override connectedCallback(): void {
     super.connectedCallback();
 
-    if (!this.hasAttribute('tabindex')) this.tabIndex = 0;
+    if (!this.hasAttribute("tabindex")) this.tabIndex = 0;
 
-    this.addEventListener('click', this.#toggleOpen);
-    this.addEventListener('focusin', this.#handleFocusIn);
-    this.addEventListener('focusout', this.#handleFocusOut);
+    this.addEventListener("click", this.#toggleOpen);
+    this.addEventListener("focusin", this.#handleFocusIn);
+    this.addEventListener("focusout", this.#handleFocusOut);
   }
 
   override disconnectedCallback(): void {
     super.disconnectedCallback();
 
-    this.removeEventListener('click', this.#toggleOpen);
-    this.removeEventListener('focusin', this.#handleFocusIn);
-    this.removeEventListener('focusout', this.#handleFocusOut);
+    this.removeEventListener("click", this.#toggleOpen);
+    this.removeEventListener("focusin", this.#handleFocusIn);
+    this.removeEventListener("focusout", this.#handleFocusOut);
   }
 
   protected override willUpdate(changedProperties: PropertyValues<this>): void {
     super.willUpdate(changedProperties);
 
-    if (changedProperties.has('_isOpen')) {
+    if (changedProperties.has("_isOpen")) {
       if (this._isOpen) {
-        this._unassignedSelected.forEach((node) => (node.slot = 'selected'));
+        this._unassignedSelected.forEach((node) => (node.slot = "selected"));
       } else {
         this.activeOption = null;
-        this._assignedSelected.forEach((node) => node.removeAttribute('slot'));
+        this._assignedSelected.forEach((node) => node.removeAttribute("slot"));
       }
     }
 
     if (
-      !this.#valueSet ||
-      changedProperties.has('value') ||
-      changedProperties.has('values')
+      !this.#valueSet
+      || changedProperties.has("value")
+      || changedProperties.has("values")
     ) {
       this.#valueSet = new Set(this.values);
     }
@@ -169,7 +169,8 @@ export class CustomSelect extends FormInput<string> {
     `;
 
     const listbox = html`
-      <div id="listbox" part="listbox" role="listbox" ?hidden="${!this._isOpen}">
+      <div id="listbox" part="listbox" role="listbox" ?hidden="${!this
+      ._isOpen}">
         <slot
           @click="${this._clickOption}"
           @slotchange="${this.#updateSlottedElements}"
@@ -194,19 +195,19 @@ export class CustomSelect extends FormInput<string> {
     super.updated(changedProperties);
 
     if (
-      changedProperties.has('_isOpen') ||
-      changedProperties.has('value') ||
-      changedProperties.has('values')
+      changedProperties.has("_isOpen")
+      || changedProperties.has("value")
+      || changedProperties.has("values")
     ) {
       this.updateComplete.then(() => this.#updateSlottedElements());
     }
 
-    if (this._isOpen && changedProperties.has('_isOpen')) {
+    if (this._isOpen && changedProperties.has("_isOpen")) {
       requestAnimationFrame(() => {
         this._pos.update(this.containerPart, this.listboxPart);
         this.#scrollToActiveOption();
       });
-    } else if (this._isOpen && changedProperties.has('activeOption')) {
+    } else if (this._isOpen && changedProperties.has("activeOption")) {
       requestAnimationFrame(() => {
         this.#scrollToActiveOption();
       });
@@ -221,7 +222,7 @@ export class CustomSelect extends FormInput<string> {
     this._isOpen = this.multiple;
     this._setValue(getValue(this.activeOption));
     this.updateComplete.then(() => {
-      this.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
+      this.dispatchEvent(new Event("input", { bubbles: true, composed: true }));
     });
   }
 
@@ -234,16 +235,18 @@ export class CustomSelect extends FormInput<string> {
 
   #handleFocusOut(e: FocusEvent): void {
     const nextTarget = e.relatedTarget as Node;
-    if (this.contains(nextTarget) || this.matches(':has(:active)')) return;
+    if (this.contains(nextTarget) || this.matches(":has(:active)")) return;
 
     this._isOpen = false;
 
     const { values } = this;
     if (
-      this.#lastValues.length !== values.length ||
-      !this.#lastValues.every((v, i) => v === values[i])
+      this.#lastValues.length !== values.length
+      || !this.#lastValues.every((v, i) => v === values[i])
     ) {
-      this.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
+      this.dispatchEvent(
+        new Event("change", { bubbles: true, composed: true }),
+      );
     }
   }
 
@@ -305,35 +308,34 @@ export class CustomSelect extends FormInput<string> {
   }
 
   #updatePlaceholder(): void {
-    this._placeholder =
-      this.selectedOptions
-        .filter((node) => !node.matches(IGNORE_SELECTOR))
-        .map((node) => node.textContent.trim())
-        .join(' ') ||
-      (this.placeholder ?? 'Select');
+    this._placeholder = this.selectedOptions
+      .filter((node) => !node.matches(IGNORE_SELECTOR))
+      .map((node) => node.textContent.trim())
+      .join(" ")
+      || (this.placeholder ?? "Select");
   }
 
   #updateSlottedElements(): void {
     this.updateComplete.then(() => this.#updatePlaceholder());
 
     this.allOptions.forEach((node) => {
-      if (!node.hasAttribute('role')) {
-        node.setAttribute('role', 'option');
+      if (!node.hasAttribute("role")) {
+        node.setAttribute("role", "option");
       }
 
-      if (!node.hasAttribute('value')) {
-        node.setAttribute('value', getValue(node));
+      if (!node.hasAttribute("value")) {
+        node.setAttribute("value", getValue(node));
       }
 
       const ignored = node.matches(IGNORE_SELECTOR);
       const selected = !ignored && this.#valueSet.has(getValue(node));
 
-      node.setAttribute('aria-selected', String(selected));
+      node.setAttribute("aria-selected", String(selected));
 
       if (selected && !this._isOpen) {
-        node.slot = 'selected';
+        node.slot = "selected";
       } else if (node.slot) {
-        node.removeAttribute('slot');
+        node.removeAttribute("slot");
       }
     });
   }
@@ -341,7 +343,8 @@ export class CustomSelect extends FormInput<string> {
   #scrollToActiveOption(): void {
     if (!this._isOpen) return;
 
-    const currentNode = this.activeOption || (!this.multiple && this.selectedOption);
+    const currentNode = this.activeOption
+      || (!this.multiple && this.selectedOption);
     if (!currentNode) return;
 
     this.activeOption = currentNode;
@@ -350,12 +353,12 @@ export class CustomSelect extends FormInput<string> {
     const listboxRect = listbox.getBoundingClientRect();
     const optionRect = currentNode.getBoundingClientRect();
 
-    const optionCenterInContent =
-      optionRect.top + optionRect.height / 2 - listboxRect.top + listbox.scrollTop;
+    const optionCenterInContent = optionRect.top + optionRect.height / 2
+      - listboxRect.top + listbox.scrollTop;
 
     const targetScroll = optionCenterInContent - listboxRect.height / 2;
 
-    listbox.scrollTo({ top: targetScroll, behavior: 'smooth' });
+    listbox.scrollTo({ top: targetScroll, behavior: "smooth" });
   }
 }
 
