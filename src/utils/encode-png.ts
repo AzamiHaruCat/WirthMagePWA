@@ -4,14 +4,14 @@ import UPNG from "upng-js";
 
 export const encodePNG = async (
   container: iq.utils.PointContainer,
-  palette: iq.utils.Palette,
-  mask?: boolean,
+  _palette: iq.utils.Palette,
+  _mask?: boolean,
 ): Promise<Blob> => {
   const width = container.getWidth();
   const height = container.getHeight();
   const points = container.getPointArray();
 
-  const p0 = palette.getPointContainer().getPointArray()[0];
+  // const p0 = palette.getPointContainer().getPointArray()[0];
 
   const rgba = new Uint8Array(width * height * 4);
   for (let i = 0; i < points.length; i++) {
@@ -19,9 +19,11 @@ export const encodePNG = async (
     rgba[i * 4 + 0] = p.r;
     rgba[i * 4 + 1] = p.g;
     rgba[i * 4 + 2] = p.b;
+    rgba[i * 4 + 3] = 255;
 
-    const isTransparent = mask && p.r === p0.r && p.g === p0.g && p.b === p0.b;
-    rgba[i * 4 + 3] = isTransparent ? 0 : 255;
+    // 透過色と黒の混同が起きるので透過処理を取りやめる
+    // const isTransparent = mask && p.r === p0.r && p.g === p0.g && p.b === p0.b;
+    // rgba[i * 4 + 3] = isTransparent ? 0 : 255;
   }
 
   const buffer = UPNG.encode([rgba.buffer], width, height, points.length);
